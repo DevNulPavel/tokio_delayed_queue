@@ -1,5 +1,5 @@
-use super::*;
 use std::time::Duration;
+use tokio_delayed_queue::DelayedQueue;
 
 #[tokio::test]
 async fn test_func() {
@@ -18,6 +18,9 @@ async fn test_func() {
 
             let dropped_future = queue.pop();
             drop(dropped_future);
+
+            let v = queue.pop().await;
+            assert_eq!(v, 1);
 
             let v = queue.pop().await;
             assert_eq!(v, 1);
@@ -46,6 +49,7 @@ async fn test_func() {
     queue.push(1, Duration::from_secs(3)).await;
     queue.push(1, Duration::from_secs(4)).await;
     queue.push(1, Duration::from_secs(4)).await;
+    queue.push(1, Duration::from_secs(5)).await;
 
     j1.await.unwrap();
     j2.await.unwrap();

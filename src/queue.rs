@@ -12,9 +12,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-use crate::{future::DelayedPop, item::DelayItem};
+use crate::{future::DelayedPopFuture, item::DelayItem};
 use async_condvar_fair::{BatonExt, Condvar};
-use derive_where::derive_where;
 use parking_lot::Mutex;
 use std::{
     collections::VecDeque,
@@ -47,18 +46,36 @@ struct Inner<T> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/// Очередь с поддержкой ожидания отдачи ответа,
-/// можно клонировать и шарить между потоками
+/// Delayed queue with atomic pop with cancellation support.
 ///
-/// Используем `derive_where`,
-/// чтобы не накладывать дополнительные условия на тип `T`.
-#[derive_where(Clone)]
+/// ```rust
+/// # use tokio_delayed_queue::DelayedQueue;
+/// # use std::time::Duration;
+/// # tokio_test::block_on(async {
+/// 
+/// // New queue
+/// let queue = DelayedQueue::new(16);
+/// 
+/// // Push
+/// queue.push(1, Duration::from_secs(1)).await;
+/// 
+/// // Pop
+/// let v = queue.pop().await;
+/// assert_eq!(v, 1);
+/// 
+/// # });
+/// ```
+//
+// Используем `derive_where`,
+// чтобы не накладывать дополнительные условия на тип `T`.
+// #[derive_where(Clone)]
 pub struct DelayedQueue<T> {
     inner: Arc<Inner<T>>,
 }
 
 impl<T> DelayedQueue<T> {
-    /// Создание очереди сразу нужной емкости, аллоцируем сразу же нужный размер один раз.
+    /// Creates new queue with fixed preallocated capacity.
+    // Создание очереди сразу нужной емкости, аллоцируем сразу же нужный размер один раз.
     pub fn new(size: usize) -> DelayedQueue<T> {
         DelayedQueue {
             inner: Arc::new(Inner {
@@ -71,7 +88,8 @@ impl<T> DelayedQueue<T> {
         }
     }
 
-    /// Добавляем новый итем с задержкой
+    /// Push new item.
+    // Добавляем новый итем с задержкой
     #[allow(clippy::await_holding_lock)]
     pub async fn push(&self, item: T, delay: Duration) {
         // Для удобства
@@ -116,9 +134,10 @@ impl<T> DelayedQueue<T> {
         this.size_condvar.notify_one();
     }
 
-    /// Получение нового итема с нужной задержкой
-    pub fn pop(&self) -> DelayedPop<T> {
-        DelayedPop {
+    /// Atomically pop delayed item. It supports pop cancelation by returned future drop.
+    // Получение нового итема с нужной задержкой
+    pub fn pop(&self) -> DelayedPopFuture<T> {
+        DelayedPopFuture {
             queue: &self.inner.queue,
             size_condvar: &self.inner.size_condvar,
             reserve_condvar: &self.inner.reserve_condvar,
@@ -130,10 +149,10 @@ impl<T> DelayedQueue<T> {
     }
 }
 
-/* impl<T> Clone for DelayedQueue<T> {
+impl<T> Clone for DelayedQueue<T> {
     fn clone(&self) -> Self {
         DelayedQueue {
             inner: self.inner.clone(),
         }
     }
-} */
+}

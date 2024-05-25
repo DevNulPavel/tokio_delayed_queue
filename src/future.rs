@@ -18,7 +18,7 @@ type CondvarWaitFuture<'a> = dyn Future<Output = Option<Baton<'a>>> + Send + 'a;
 // #[pin_project]
 
 /// Футура проверки доступности нового итема
-pub struct DelayedPop<'a, T> {
+pub struct DelayedPopFuture<'a, T> {
     // /// Нотифаер для отправки уведомлений
     pub(super) size_condvar: &'a Condvar,
 
@@ -46,13 +46,13 @@ pub struct DelayedPop<'a, T> {
 
 /// Помечаем явно, что у нас эта самая футура не привязана никак к расположению своему.
 // TODO: Но вроде бы это и так у нас будет автоматически?
-impl<'a, T> Unpin for DelayedPop<'a, T> {}
+impl<'a, T> Unpin for DelayedPopFuture<'a, T> {}
 
 /// Явно помечаем дополнительно, что у нас IoHandle не является запинированным если S: Source.
 /// Видимо, это нужно чтобы указать Unpin только для определенных типов S.
 // impl<'a, T> Unpin for DelayedPop<'a, T> where T: Unpin {}
 
-impl<'a, T: Send> Future for DelayedPop<'a, T> {
+impl<'a, T: Send> Future for DelayedPopFuture<'a, T> {
     type Output = T;
 
     fn poll(
