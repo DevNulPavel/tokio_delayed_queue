@@ -14,7 +14,7 @@ edition = "2021"
 parking_lot = { version = "^0.12.2", features = ["send_guard"] }
 async-condvar-fair = { version = "^1.0.1", features = ["parking_lot_0_12"] }
 derive-where = "^1.2.7"
-pin-project = "^1.1.5"
+# pin-project = "^1.1.5"
 # pin-project-lite = "^0.2.14"
 
 # Tokio
@@ -24,4 +24,9 @@ tokio = { version = "^1.37.0", features = ["time"] }
 
 [dev-dependencies]
 # Tokio
-tokio = { version = "^1.37.0", features = ["rt", "rt-multi-thread", "test-util"] }
+tokio = { version = "^1.37.0", features = [
+    "macros",
+    "rt",
+    "rt-multi-thread",
+    "test-util",
+] }
