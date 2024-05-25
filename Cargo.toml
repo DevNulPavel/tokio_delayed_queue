@@ -6,6 +6,18 @@
 name = "tokio_delayed_queue"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Asynchronous delayed queue for Tokio runtime."
+readme = "README.md"
+authors = ["Pavel Ershov <devnulpavel@gmail.com>"]
+# Keywords: https://crates.io/keywords
+keywords = ["async", "tokio", "data-structures"]
+# Categories available: https://crates.io/category_slugs
+categories = ["asynchronous", "data-structures"]
+documentation = "https://docs.rs/tokio_delayed_queue"
+repository = "https://github.com/DevNulPavel/tokio_delayed_queue"
+publish = ["crates-io"]
+exclude = []
 
 ############################################################################
 
@@ -13,9 +25,6 @@ edition = "2021"
 # Common
 parking_lot = { version = "^0.12.2", features = ["send_guard"] }
 async-condvar-fair = { version = "^1.0.1", features = ["parking_lot_0_12"] }
-# derive-where = "^1.2.7"
-# pin-project = "^1.1.5"
-# pin-project-lite = "^0.2.14"
 
 # Tokio
 tokio = { version = "^1.37.0", features = ["time"] }

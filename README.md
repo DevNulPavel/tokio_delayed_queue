@@ -1,6 +1,6 @@
 # Tokio delayed queue
 
-Asyncronous delayed queue for Tokio runtime. 
+Asynchronous delayed queue for Tokio runtime. 
 
 # Features
 
