@@ -1,0 +1,11 @@
+# OSX
+.DS_Store
+
+# Rust
+target/
+Cargo.lock
+
+# Git
+!.gitkeep
+!.gitignore
+!.gitattributes
