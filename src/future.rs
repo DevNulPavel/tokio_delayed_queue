@@ -12,12 +12,8 @@ type CondvarWaitFuture<'a> = dyn Future<Output = Option<Baton<'a>>> + Send + 'a;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO: Проблема этого макроса в том, что он не поддерживает doc_comments
-// pin_project! {
-// }
-// #[pin_project]
-
-/// Футура проверки доступности нового итема
+/// Delayed queue future.
+// Футура проверки доступности нового итема
 pub struct DelayedPopFuture<'a, T> {
     // /// Нотифаер для отправки уведомлений
     pub(super) size_condvar: &'a Condvar,
@@ -44,12 +40,12 @@ pub struct DelayedPopFuture<'a, T> {
     pub(super) future_id: u64,
 }
 
-/// Помечаем явно, что у нас эта самая футура не привязана никак к расположению своему.
+// Помечаем явно, что у нас эта самая футура не привязана никак к расположению своему.
 // TODO: Но вроде бы это и так у нас будет автоматически?
 impl<'a, T> Unpin for DelayedPopFuture<'a, T> {}
 
-/// Явно помечаем дополнительно, что у нас IoHandle не является запинированным если S: Source.
-/// Видимо, это нужно чтобы указать Unpin только для определенных типов S.
+// Явно помечаем дополнительно, что у нас IoHandle не является запинированным если S: Source.
+// Видимо, это нужно чтобы указать Unpin только для определенных типов S.
 // impl<'a, T> Unpin for DelayedPop<'a, T> where T: Unpin {}
 
 impl<'a, T: Send> Future for DelayedPopFuture<'a, T> {

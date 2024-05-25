@@ -4,7 +4,7 @@
 
 [package]
 name = "tokio_delayed_queue"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "Asynchronous delayed queue for Tokio runtime."
