@@ -8,11 +8,11 @@ default:
 
 FORMAT_JUSTFILE:
     just \
-		--fmt \
-		--unstable
+        --fmt \
+        --unstable
 
 ########################################################################
 
 @PUBLISH:
     cargo publish \
-		--registry "crates-io"
+        --registry "crates-io"
