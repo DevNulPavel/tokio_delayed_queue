@@ -7,7 +7,10 @@ use std::sync::{
 ////////////////////////////////////////////////////////////////////////////////
 
 pub(super) struct ReserveWaker<'a> {
+    /// Пробуждалка для резервирования
     pub(super) condvar: &'a Condvar,
+    
+    /// Используется Arc, так как очередь у нас под блокировкой
     pub(super) item_reserved_future: Weak<AtomicU64>,
 }
 
