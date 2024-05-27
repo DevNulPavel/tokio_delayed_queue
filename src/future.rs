@@ -2,7 +2,11 @@ use crate::{item::DelayItem, reserve::ReserveWaker, sleep::SleepLocal};
 use async_condvar_fair::{Baton, BatonExt, Condvar};
 use parking_lot::Mutex;
 use std::{
-    collections::VecDeque, future::Future, pin::Pin, sync::atomic::Ordering, task::Poll,
+    collections::VecDeque,
+    future::Future,
+    pin::Pin,
+    sync::{atomic::Ordering, Arc},
+    task::Poll,
     time::Instant,
 };
 
@@ -139,7 +143,7 @@ impl<'a, T: Send> Future for DelayedPopFuture<'a, T> {
                     // Создаем waker для отслеживания отмены футуры
                     self.reserve_waker = Some(ReserveWaker {
                         condvar: self.reserve_condvar,
-                        item_reserved_future: front_val.reserved.clone(),
+                        item_reserved_future: Arc::downgrade(&front_val.reserved),
                     });
 
                     drop(lock);
@@ -158,6 +162,10 @@ impl<'a, T: Send> Future for DelayedPopFuture<'a, T> {
 
                     // Говорим, что освободилось новое место
                     self.size_condvar.notify_one();
+
+                    // Дополнительно можно было бы еще уведомить об этом через reserve_condvar,
+                    // но это будет сделано автоматически при уничтожении футуры.
+                    // self.reserve_condvar.notify_one();
 
                     // Итем готов
                     return Poll::Ready(item);

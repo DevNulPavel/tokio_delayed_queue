@@ -1,22 +1,25 @@
 use async_condvar_fair::Condvar;
 use std::sync::{
     atomic::{AtomicU64, Ordering},
-    Arc,
+    Weak,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 pub(super) struct ReserveWaker<'a> {
     pub(super) condvar: &'a Condvar,
-    pub(super) item_reserved_future: Arc<AtomicU64>,
+    pub(super) item_reserved_future: Weak<AtomicU64>,
 }
 
 impl<'a> Drop for ReserveWaker<'a> {
     fn drop(&mut self) {
         // Никто больше не резервирует итем
-        self.item_reserved_future.store(0, Ordering::Release);
+        if let Some(still_reserved) = self.item_reserved_future.upgrade() {
+            // Снимаем статус резервирования
+            still_reserved.store(0, Ordering::Release);
+        }
 
-        // Уведомляем об этом не только одного ожидателя
+        // Всегда уведомляем кого-то, кто ждет результат, а не только при отмене.
         self.condvar.notify_one();
     }
 }
